@@ -437,7 +437,7 @@
     weekEl.textContent = pow.weekOf || '';
     weekEl.hidden = !pow.weekOf; // no label (and no empty pill) when weekOf is omitted
     const lastNm = n => String(n||'').trim().split(/\s+/).slice(-1)[0] || '';
-    const posNm = pos => pos==='G' ? 'Goalie' : (pos==='D' ? 'Defense' : 'Forward');
+    const posNm = pos => pos==='G' ? 'Goalie' : (pos==='D' ? 'Defense' : (pos==='F' ? 'Forward' : ''));
     const photoSrc = 'assets/roster-photos/' + encodeURIComponent(p.name) + '.jpeg';
     // Each Q&A pair is wrapped together so the grid can't split a question from
     // its answer onto different rows/columns.
@@ -518,7 +518,7 @@
   // badge is silently removed and the jersey art alone is shown, unchanged.
   const rosterPhotoSrc = p => p.photo || ('assets/roster-photos/' + encodeURIComponent(p.name) + '.jpeg');
   const lastName = name => String(name || '').trim().split(/\s+/).slice(-1)[0] || '';
-  const positionName = p => p === 'G' ? 'Goalie' : (p === 'D' ? 'Defense' : 'Forward');
+  const positionName = p => p === 'G' ? 'Goalie' : (p === 'D' ? 'Defense' : (p === 'F' ? 'Forward' : ''));
   const grid = document.getElementById('roster-grid');
   grid.innerHTML = ROSTER.map((p, i) => `
     <div class="card flip-card pos-${p.pos}" tabindex="0" role="button" aria-label="${p.name}, tap to flip for stats" data-idx="${i}">
@@ -553,6 +553,7 @@
               <div class="stat-cell"><div class="sv mono">${p.appg.toFixed(1)}</div><div class="sl">Pts/Gm</div></div>
               <div class="stat-cell"><div class="sv mono">${p.pim}</div><div class="sl">PIM</div></div>
             </div>
+            ${p.last ? `<div class="sf-last"><span>Last season</span> ${p.last.g}G · ${p.last.a}A · <b>${p.last.pts}P</b> in ${p.last.gp} GP</div>` : ''}
           </div>
         </div>
       </div>
@@ -645,6 +646,21 @@
   }
   renderStats();
   document.getElementById('stats-sort')?.addEventListener('change', renderStats);
+
+  // Last season's stats for returning players (data/roster.js `last`).
+  function renderLastSeason(){
+    const sec=document.getElementById('last-season-section'); const body=document.getElementById('last-season-body');
+    if(!sec||!body) return;
+    const rows=ROSTER.filter(p=>p.last).slice().sort((a,b)=>b.last.pts-a.last.pts||a.name.localeCompare(b.name));
+    if(!rows.length){ sec.hidden=true; return; }
+    const lbl=document.getElementById('last-season-label'); if(lbl && typeof LAST_SEASON_LABEL!=='undefined') lbl.textContent=LAST_SEASON_LABEL;
+    const mx=k=>Math.max(...rows.map(p=>p.last[k]));
+    const lead=(v,m)=>m>0&&v===m?' stat-lead':'';
+    body.innerHTML=rows.map(p=>{const L=p.last, ppg=L.gp?(L.pts/L.gp):0;
+      return `<tr><td class="mono">${p.n}</td><td>${p.name}</td><td class="mono">${L.gp}</td><td class="mono${lead(L.g,mx('g'))}">${L.g}</td><td class="mono${lead(L.a,mx('a'))}">${L.a}</td><td class="mono${lead(L.pts,mx('pts'))}">${L.pts}</td><td class="mono">${ppg.toFixed(2)}</td><td class="mono">${L.pim}</td></tr>`;}).join('');
+    sec.hidden=false;
+  }
+  renderLastSeason();
 
   // The first five tournament games pre-date reliable goalie-participation logging.
   // Preserve the confirmed Ana totals through Sep 6, then add any later games

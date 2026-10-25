@@ -177,5 +177,10 @@
     if (cnt) cnt.textContent = ROSTER.length ? ROSTER.length + ' players' : 'Roster coming soon';
     const gl = $('goalie-count');
     if (gl) { const g = ROSTER.filter(p => p.pos === 'G'); gl.textContent = g.map(p => p.name.split(/\s+/)[0]).join(' + '); }
+    if (!ROSTER.some(p => p.pos === 'G')) {
+      const board = $('goalie-leaderboard'); const card = board && board.closest('.card');
+      const label = card && card.previousElementSibling;
+      if (card) card.hidden = true; if (label) label.hidden = true;
+    }
   }
 })();
