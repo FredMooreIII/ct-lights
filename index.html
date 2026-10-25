@@ -1,0 +1,317 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><link rel="stylesheet" href="styles.css"></head><body>
+<title>Northern CT Lights HQ</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png">
+<link rel="apple-touch-icon" href="assets/brand/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-emoji" data-team="emoji">💡</div>
+    <h1 data-team="gate-title">Northern CT Lights</h1>
+    <p class="sub">Enter the team passcode to see the schedule, roster &amp; stats.</p>
+    <form id="gate-form" autocomplete="off">
+      <input type="password" id="gate-input" placeholder="Team passcode" autocapitalize="off" autocomplete="off" inputmode="text">
+      <button type="submit">Enter</button>
+      <div class="err" id="gate-err">That's not quite right &mdash; check with your team manager.</div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-note">
+    <h3 id="modal-title"></h3>
+    <div id="modal-fields"></div>
+    <div class="modal-note" id="modal-note" style="display:none;"></div>
+    <div style="display:flex; gap:10px; margin-top:18px;">
+      <button type="button" id="modal-extra" class="bench-btn red" style="flex:1;" hidden>Delete Game</button>
+      <button type="button" id="modal-cancel" class="bench-btn ghost" style="flex:1;">Cancel</button>
+      <button type="button" id="modal-ok" class="bench-btn win" style="flex:1;">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="site-content">
+<header class="top">
+  <div class="top-inner">
+    <div class="crest" id="team-crest" aria-hidden="true">
+    </div>
+    <div class="wordmark">
+      <div class="l1 display" data-team="wordmark">Northern CT Lights</div>
+      <div class="l2" data-team="level"></div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-panel="week" class="active">Home</button>
+      <button data-panel="scores" hidden>Scores<span class="live-dot" id="scores-live-dot" hidden aria-label="Live game in progress"></span></button>
+      <button data-panel="season">Season</button>
+      <button data-panel="roster">Roster</button>
+      <button data-panel="stats">Stats</button>
+      <button data-panel="resources">Resources</button>
+    </nav>
+    <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="tabs">☰</button>
+    <div class="record-chip"><span>Record:</span><b id="header-record">0-0-0</b></div>
+  </div>
+</header>
+
+<div class="live-banner" id="live-banner" aria-live="polite">
+  <a href="#panel-scores" id="live-banner-link" aria-label="Open live score">
+    <span class="live-label"><span class="live-pulse"></span> LIVE</span>
+    <span class="live-score" id="live-banner-score">Lights 0 – Opponent 0</span>
+    <span class="live-meta" id="live-banner-meta">1st · 15:00</span>
+    <span class="live-arrow">›</span>
+  </a>
+</div>
+
+<main>
+
+  <!-- HOME -->
+  <section class="panel active" id="panel-week">
+
+    <div class="section-label"><h2>This Weekend</h2><span class="count" id="home-weekend-count"></span><div class="rule"></div></div>
+    <p class="muted" id="home-weekend-dates"></p>
+    <div class="grid" id="home-weekend-games" style="gap:12px;"></div>
+    <div class="section-label"><h2>Last Week Recap</h2><span class="count" id="home-recap-count"></span><div class="rule"></div></div>
+    <p class="muted" id="home-recap-dates"></p>
+    <div class="grid" id="home-recap-games" style="gap:12px;"></div>
+
+    <div id="home-mvp-section" hidden>
+      <div class="section-label"><h2>Game MVP</h2><span class="count" id="home-mvp-count"></span><div class="rule"></div></div>
+      <div class="grid" id="home-mvp-cards" style="gap:12px;"></div>
+    </div>
+
+    <div class="section-label"><h2>Upcoming Practices</h2><div class="rule"></div></div>
+    <div class="card">
+      <div class="table-wrap">
+        <table class="plain">
+          <tr><th>Day</th><th>Session</th><th>Rink</th></tr>
+          <tbody id="home-practice-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="home-potw-section" hidden>
+      <div class="section-label"><h2>Player of the Week</h2><span class="count" id="home-potw-weekof"></span><div class="rule"></div></div>
+      <div class="card" style="padding:20px 22px;">
+        <div id="home-potw-layout"></div>
+      </div>
+    </div>
+
+    <div class="section-label"><h2>This Weekend's Games Map</h2><span class="count">This Weekend</span><div class="rule"></div></div>
+    <div class="card"><div class="map-wrap"><div id="schedule-map"></div></div><div class="map-legend">Pins show this weekend's scheduled games. Tap a pin for opponent, start time, and arrival time.</div></div>
+
+    <div class="section-label"><h2>This Week's Rinks</h2><div class="rule"></div></div>
+    <div class="card" id="week-rinks-card" style="padding:6px 0;"></div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a class="cta" id="team-ig-cta" href="#" target="_blank" rel="noopener">Follow on Instagram →</a>
+    </div>
+
+  </section>
+
+  <!-- SCORES (live) -->
+  <section class="panel" id="panel-scores">
+
+    <div class="section-label"><h2>Live Game</h2><div class="rule"></div></div>
+
+    <div class="card" id="live-board" style="padding:26px 24px;"></div>
+
+    <div class="note" style="margin-top:10px;">🏒 <span>Unofficial &mdash; tracked live from the bench, not the referee's scoresheet.</span></div>
+
+    <div class="section-label"><h2>Game Breakdown</h2><div class="rule"></div></div>
+    <div class="card" style="padding:18px 20px;" id="boxscore-card"></div>
+
+    <div class="section-label"><h2>This Weekend’s Results</h2><div class="rule"></div></div>
+    <div class="grid" id="scores-weekend-results" style="gap:12px;"></div>
+    <div class="section-label"><h2>Bench Controls</h2><div class="rule"></div></div>
+    <div class="card" style="padding:18px 20px;">
+      <label class="switch-label">
+        <span class="switch"><input type="checkbox" id="bench-toggle"><span class="slider"></span></span>
+        Show bench controls on this device (passcode required)
+      </label>
+      <div class="note" style="margin-top:12px;">🔔 <span>Team manager/coach only &mdash; turning this on asks for the bench passcode. Everyone else just watches the scoreboard update live above.</span></div>
+
+      <div id="bench-panel" hidden style="margin-top:16px; display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="flex:1; min-width:200px;">
+            <label class="muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:4px;">Opponent</label>
+            <select id="bc-opponent" class="bench-field" style="width:100%;"></select>
+            <input type="text" id="bc-opponent-other" class="bench-field" placeholder="Type opponent name" style="width:100%; margin-top:6px;" hidden>
+          </div>
+          <div style="min-width:180px;">
+            <label class="muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:4px;">Starting Goalie</label>
+            <select id="bc-goalie-start" class="bench-field" style="width:100%;"></select>
+          </div>
+          <button type="button" id="bc-game-toggle" class="bench-btn">Start Game</button>
+        </div>
+
+        <div class="bench-clock-wrap">
+          <div style="flex:1; min-width:150px;">
+            <div class="bench-clock-big" id="bc-clock-big" data-team="clock">12:00</div>
+            <div class="bench-clock-sub" id="bc-clock-sub">Period 1</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button type="button" id="bc-clock-toggle" class="bench-btn clock-primary">Start Clock</button>
+            <button type="button" id="bc-period" class="bench-btn">Next Period →</button>
+            <button type="button" id="bc-clock-edit" class="bench-btn ghost">Edit Time</button>
+            <button type="button" id="bc-clock-reset" class="bench-btn ghost">Reset Clock</button>
+          </div>
+        </div>
+
+        <div class="bench-team-grid">
+          <div class="bench-team-section">
+            <div class="bench-team-title us"><span data-team="emoji">💡</span> <span data-team="short">Lights</span></div>
+            <div style="display:grid; gap:8px;">
+              <button type="button" id="bc-goal-us" class="bench-btn win team-action">+1 Goal</button>
+              <button type="button" id="bc-penalty-us" class="bench-btn ghost team-action">+ Penalty</button>
+            </div>
+          </div>
+          <div class="bench-team-section">
+            <div class="bench-team-title opp">Opponent</div>
+            <div style="display:grid; gap:8px;">
+              <button type="button" id="bc-goal-opp" class="bench-btn loss team-action">+1 Goal</button>
+              <button type="button" id="bc-penalty-opp" class="bench-btn ghost team-action">+ Penalty</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" id="bc-goalie-change" class="bench-btn ghost">Goalie Change</button>
+          <button type="button" id="bc-attendance" class="bench-btn ghost">Attendance</button>
+          <button type="button" id="bc-undo" class="bench-btn ghost">Undo Last Event</button>
+          <button type="button" id="bc-overtime" class="bench-btn ghost">Overtime</button>
+          <button type="button" id="bc-shootout" class="bench-btn ghost">Shootout</button>
+          <button type="button" id="bc-add-past" class="bench-btn ghost">+ Add Past Game</button>
+        </div>
+        <div class="note" style="margin-top:2px;">✏️ <span>Made a mistake? Edit or delete any entry in the Results box above &mdash; those buttons only show up while bench controls are unlocked, so you can go back and fix a time, score, or player later, mid-game or after.</span></div>
+        <div class="bench-status-msg" id="bc-status"></div>
+
+        <div class="section-label" style="margin:18px 0 8px;"><h2 style="font-size:13px;">Manage Logged Games</h2><div class="rule"></div></div>
+        <div class="note" style="margin-bottom:4px;">📜 <span>Games ended above are archived here. The public Season tab shows the full boxscore for any played game. Tap <b>Manage</b> on a game to open its play-by-play and fix a wrong goal scorer, assist, or penalty, add a play you missed, or edit the opponent/date &mdash; or use Delete to remove a stray test entry entirely.</span></div>
+        <div id="bench-history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:10px;">📖 <span>Full box scores for every played game live on the <b>Season</b> tab &mdash; tap any final score there to expand it.</span></div>
+
+    <script id="live-game-seed" type="application/json">{"game":{"active":false,"opponent":"","gameId":"","date":"","period":1,"events":[],"clockRunning":false,"clockStartedAt":null,"clockElapsedMs":0},"history":[],"scheduleResults":{}}</script>
+
+  </section>
+
+  <!-- SEASON -->
+  <section class="panel" id="panel-season">
+
+    <div class="card season-record">
+      <div>
+        <div class="num" id="season-record-num">0&ndash;0</div>
+        <div class="lbl"><span data-team="season">2026–27</span> Record</div>
+      </div>
+      <div class="stats">
+        <div><div class="num" id="season-gd" style="font-size:22px">0</div><div class="lbl">Goal Diff.</div></div>
+        <div><div class="num" id="season-played" style="font-size:22px">0</div><div class="lbl">Played</div></div>
+        <a data-team="mhr" href="#" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;"><div class="num" style="font-size:22px">—</div><div class="lbl">MHR Rating ↗</div></a>
+      </div>
+    </div>
+
+    <div class="switch-row">
+      <label class="switch-label"><span class="switch"><input type="checkbox" id="toggle-practices"><span class="slider"></span></span>Show practices</label>
+    </div>
+
+    <div id="season-months"></div>
+
+
+  </section>
+
+  <!-- ROSTER -->
+  <section class="panel" id="panel-roster">
+
+    <div class="section-label"><h2><span data-team="season">2026–27</span> Roster</h2><span class="count" id="roster-count"></span><div class="rule"></div></div>
+
+    <div class="grid roster-grid" id="roster-grid"></div>
+
+    <div class="roster-legend" style="margin-top:16px;">
+      <span>🔄 Tap a card to flip &mdash; front is the jersey, back is this season's stats</span>
+      <span><span class="swatch" style="background:var(--surface-2); border:1px solid var(--border)"></span>&ldquo;R&rdquo; = returning player</span>
+    </div>
+
+    <div id="team-staff-section"><div class="section-label"><h2>Coaching Staff</h2><div class="rule"></div></div>
+    <div class="grid res-grid" id="team-staff" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"></div></div>
+
+  </section>
+
+  <!-- STATS -->
+  <section class="panel" id="panel-stats">
+
+    <div class="section-label"><h2>Team Stats</h2><div class="rule"></div></div>
+
+    <div class="card season-record" style="margin-bottom:28px;">
+      <div>
+        <div class="num" id="stats-record-num">0&ndash;0</div>
+        <div class="lbl"><span data-team="season">2026–27</span> Record</div>
+      </div>
+      <div class="stats">
+        <div><div class="num" id="stats-gf" style="font-size:22px">0</div><div class="lbl">Goals For</div></div>
+        <div><div class="num" id="stats-ga" style="font-size:22px">0</div><div class="lbl">Goals Against</div></div>
+        <a data-team="mhr" href="#" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;"><div class="num" style="font-size:22px">—</div><div class="lbl">MHR Rating ↗</div></a>
+      </div>
+    </div>
+
+    <div class="section-label"><h2>Player Leaderboard</h2><div class="rule"></div></div>
+    <div class="card" style="overflow-x:auto;">
+      <div class="stats-sortbar"><label for="stats-sort">Sort</label><select id="stats-sort" aria-label="Sort player stats"><option value="name-asc">Player A–Z</option><option value="name-desc">Player Z–A</option><option value="pts-desc">Points high–low</option><option value="gp-desc">GP high–low</option><option value="g-desc">Goals high–low</option><option value="a-desc">Assists high–low</option></select></div>
+      <table class="plain" id="stats-table">
+        <thead><tr><th>#</th><th>Player</th><th>GP</th><th>G</th><th>A</th><th>Pts</th><th>Pts/Gm</th><th>PIM</th></tr></thead>
+        <tbody id="stats-table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="section-label"><h2>Goalie Leaderboard</h2><span class="count" id="goalie-count"></span><div class="rule"></div></div>
+    <div class="card"><div id="goalie-leaderboard" class="goalie-board"></div></div>
+
+    <div id="mhr-section"><div class="section-label"><h2>MHR Ranking Trend</h2><div class="rule"></div></div>
+    <div class="card" style="padding:20px;">
+      <div class="note" id="mhr-note"></div>
+    </div></div>
+
+  </section>
+
+  <!-- RESOURCES -->
+  <section class="panel" id="panel-resources">
+
+    <div class="section-label"><h2>Team Resources</h2><div class="rule"></div></div>
+
+    <div class="grid res-grid" id="team-resources">
+      <div class="card res-card">
+        <h4>🔒 Live Scoring</h4>
+        <p style="font-size:13.5px;color:var(--ink-dim);line-height:1.5;margin:0 0 10px;">Live scores don't yet sync across devices, so this page is bench-manager access only for now.</p>
+        <a class="cta" href="#" id="scores-gate-link">Open Scores →</a>
+      </div>
+    </div>
+
+    <div class="section-label" id="team-tournaments-section"><h2>Tournament &amp; Showcase Info</h2><div class="rule"></div></div>
+    <div class="grid" id="team-tournaments" style="gap:16px;"></div>
+
+  </section>
+
+</main>
+
+<footer>
+  <span><span data-team="name">Northern CT Lights</span> &middot; built for the <span data-team="season">2026–27</span> season</span>
+  <span data-team="level"></span>
+</footer>
+</div>
+
+<script src="data/team.js"></script>
+<script src="data/config.js"></script>
+<script src="data/schedule.js"></script>
+<script src="data/practices.js"></script>
+<script src="data/roster.js"></script>
+<script src="data/logos.js"></script>
+<script src="data/mvp.js"></script>
+<script src="data/potw.js"></script>
+<script src="team-render.js"></script>
+<script src="app.js"></script>
+
+</body></html>
