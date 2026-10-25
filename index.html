@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><link rel="stylesheet" href="styles.css"></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><link rel="stylesheet" href="styles.css?v=20261025c"></head><body>
 <title>Northern CT Lights HQ</title>
 <link rel="icon" type="image/png" href="assets/brand/favicon.png">
 <link rel="apple-touch-icon" href="assets/brand/favicon.png">
@@ -314,15 +314,15 @@
 </footer>
 </div>
 
-<script src="data/team.js"></script>
-<script src="data/config.js"></script>
-<script src="data/schedule.js"></script>
-<script src="data/practices.js"></script>
-<script src="data/roster.js"></script>
-<script src="data/logos.js"></script>
-<script src="data/mvp.js"></script>
-<script src="data/potw.js"></script>
-<script src="team-render.js"></script>
-<script src="app.js"></script>
+<script>
+  // Always load the newest data/app files (GitHub Pages caches them ~10 min otherwise).
+  (function(){
+    var v = Date.now();
+    ['data/team.js','data/config.js','data/schedule.js','data/practices.js','data/roster.js',
+     'data/logos.js','data/mvp.js','data/potw.js','team-render.js','app.js'].forEach(function(f){
+      document.write('<script src="' + f + '?v=' + v + '"><\/script>');
+    });
+  })();
+</script>
 
 </body></html>
