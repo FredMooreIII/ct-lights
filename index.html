@@ -268,13 +268,17 @@
     </div>
 
     <div id="last-season-section" hidden>
-    <div class="section-label"><h2>Last Season</h2><span class="count" id="last-season-label"></span><div class="rule"></div></div>
+    <div class="switch-row" style="margin-top:22px;">
+      <label class="switch-label"><span class="switch"><input type="checkbox" id="toggle-last-season"><span class="slider"></span></span>Show last season&rsquo;s stats <span class="muted" id="last-season-label" style="margin-left:6px;font-size:12px;"></span></label>
+    </div>
+    <div id="last-season-body-wrap" hidden>
     <div class="card" style="overflow-x:auto;">
       <table class="plain">
         <thead><tr><th>#</th><th>Player</th><th>GP</th><th>G</th><th>A</th><th>Pts</th><th>Pts/Gm</th><th>PIM</th></tr></thead>
         <tbody id="last-season-body"></tbody>
       </table>
       <p class="muted" style="font-size:11px;margin:10px 16px 12px;">Returning players' totals from last season's team. Team record last season: 24-22-5.</p>
+    </div>
     </div>
     </div>
 

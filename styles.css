@@ -687,7 +687,8 @@ nav.tabs button.active{ color:var(--on-accent, #fff); }
 .stat-face .sf-last{ margin-top:8px; text-align:center; font-size:11px; color:var(--ink-dim); background:var(--surface-2); border-radius:7px; padding:5px 4px; }
 .stat-face .sf-last span{ display:block; font-size:8.5px; letter-spacing:.08em; text-transform:uppercase; }
 .stat-face .sf-last b{ color:var(--ink); }
-#last-season-section, #mhr-section{ margin-top:28px; }
+#mhr-section{ margin-top:28px; }
+#last-season-body-wrap{ margin-top:12px; }
 /* "R" badge belongs to the jersey side only — never bleed through to the stats side */
 #roster-grid .r-tag{ backface-visibility:hidden; -webkit-backface-visibility:hidden; transition:opacity .2s; }
 #roster-grid .flip-card.flipped .r-tag{ opacity:0; visibility:hidden; }

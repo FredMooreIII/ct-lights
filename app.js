@@ -659,6 +659,8 @@
     body.innerHTML=rows.map(p=>{const L=p.last, ppg=L.gp?(L.pts/L.gp):0;
       return `<tr><td class="mono">${p.n}</td><td>${p.name}</td><td class="mono">${L.gp}</td><td class="mono${lead(L.g,mx('g'))}">${L.g}</td><td class="mono${lead(L.a,mx('a'))}">${L.a}</td><td class="mono${lead(L.pts,mx('pts'))}">${L.pts}</td><td class="mono">${ppg.toFixed(2)}</td><td class="mono">${L.pim}</td></tr>`;}).join('');
     sec.hidden=false;
+    const tog=document.getElementById('toggle-last-season'), wrap=document.getElementById('last-season-body-wrap');
+    if(tog && wrap && !tog.dataset.bound){ tog.dataset.bound='1'; tog.addEventListener('change',()=>{ wrap.hidden=!tog.checked; }); wrap.hidden=!tog.checked; }
   }
   renderLastSeason();
 
